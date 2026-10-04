@@ -1,0 +1,9 @@
+{
+  "name": "yt-transcript-cli",
+  "version": "1.0.0",
+  "description": "Fetch a YouTube video transcript from the command line — clean text or SRT, no API key, no cookies.",
+  "type": "module",
+  "bin": { "yt-transcript": "yt-transcript.mjs" },
+  "license": "MIT",
+  "keywords": ["youtube", "transcript", "subtitles", "captions", "srt", "cli"]
+}
