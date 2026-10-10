@@ -22,19 +22,21 @@ export class TranscriptError extends Error {
 }
 
 async function callPlayer(videoId, { client, ua }, fetchImpl) {
-  let res;
+  let res, body;
   try {
     res = await fetchImpl(PLAYER_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'user-agent': ua },
       body: JSON.stringify({ context: { client }, videoId }),
     });
+    body = await res.text();
   } catch (e) {
     throw new TranscriptError('NETWORK', `player request failed: ${e.message}`, { retryable: true });
   }
   if (res.status === 429 || res.status === 403) throw new TranscriptError('BLOCKED', `player HTTP ${res.status}`, { retryable: true });
-  if (!res.ok) throw new TranscriptError('NETWORK', `player HTTP ${res.status}`, { retryable: true });
-  const data = await res.json();
+  if (!res.ok) throw new TranscriptError('NETWORK', `player HTTP ${res.status}`, { retryable: res.status >= 500 || res.status === 408 });
+  let data;
+  try { data = JSON.parse(body); } catch { throw new TranscriptError('BAD_RESPONSE', 'YouTube answered the player request with something other than JSON', { retryable: true }); }
 
   const ps = data.playabilityStatus || {};
   if (ps.status === 'ERROR') throw new TranscriptError('NOT_FOUND', ps.reason || 'Video unavailable');
@@ -55,7 +57,8 @@ export async function fetchTranscript(videoId, { language = 'en', preferManual =
       break;
     } catch (e) {
       lastErr = e;
-      if (e.errorType !== 'BLOCKED') throw e; // only the bot wall is worth another client
+      // The bot wall and consent/interstitial pages are per-client; anything else is final.
+      if (e.errorType !== 'BLOCKED' && e.errorType !== 'BAD_RESPONSE') throw e;
     }
   }
   if (!data) throw lastErr;
@@ -64,14 +67,17 @@ export async function fetchTranscript(videoId, { language = 'en', preferManual =
   if (!tracks.length) throw new TranscriptError('NO_CAPTIONS', 'This video has no caption tracks');
   const track = selectTrack(tracks, language, preferManual);
 
-  let tt;
+  let tt, xml;
   try {
     tt = await fetchImpl(track.baseUrl, { headers: { 'user-agent': ua } });
+    xml = await tt.text();
   } catch (e) {
     throw new TranscriptError('NETWORK', `timedtext request failed: ${e.message}`, { retryable: true });
   }
   if (!tt.ok) throw new TranscriptError(tt.status === 429 || tt.status === 403 ? 'BLOCKED' : 'NETWORK', `timedtext HTTP ${tt.status}`, { retryable: true });
-  const segments = parseTimedtext(await tt.text());
+  // An empty or HTML 200 body is YouTube refusing, not a caption track with no words.
+  if (!/<(timedtext|transcript)\b/.test(xml)) throw new TranscriptError('BAD_RESPONSE', 'YouTube answered the caption request with something other than captions', { retryable: true });
+  const segments = parseTimedtext(xml);
   if (!segments.length) throw new TranscriptError('EMPTY_TRANSCRIPT', 'Caption track exists but contains no text');
 
   const vd = data.videoDetails || {};

@@ -1,9 +1,34 @@
 {
   "name": "yt-transcript-cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Fetch a YouTube video transcript from the command line — clean text or SRT, no API key, no cookies.",
   "type": "module",
-  "bin": { "yt-transcript": "yt-transcript.mjs" },
+  "bin": {
+    "yt-transcript": "yt-transcript.mjs"
+  },
+  "files": [
+    "yt-transcript.mjs",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inmanjeffrey89-cell/yt-transcript-cli.git"
+  },
   "license": "MIT",
-  "keywords": ["youtube", "transcript", "subtitles", "captions", "srt", "cli"]
+  "keywords": [
+    "youtube",
+    "transcript",
+    "subtitles",
+    "captions",
+    "srt",
+    "cli"
+  ]
 }

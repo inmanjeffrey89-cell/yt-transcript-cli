@@ -12,7 +12,8 @@ export function parseVideoId(input) {
     const id = u.pathname.slice(1).split('/')[0];
     return ID_RE.test(id) ? id : null;
   }
-  if (host !== 'youtube.com' && !host.endsWith('.youtube.com')) return null;
+  const nocookie = host === 'youtube-nocookie.com';
+  if (!nocookie && host !== 'youtube.com' && !host.endsWith('.youtube.com')) return null;
   const v = u.searchParams.get('v');
   if (v && ID_RE.test(v)) return v;
   const m = u.pathname.match(/^\/(?:shorts|live|embed|v)\/([A-Za-z0-9_-]{11})(?:[/?]|$)/);
