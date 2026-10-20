@@ -1,6 +1,6 @@
 {
   "name": "yt-transcript-cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Fetch a YouTube video transcript from the command line — clean text or SRT, no API key, no cookies.",
   "type": "module",
   "bin": {
@@ -23,6 +23,15 @@
     "url": "git+https://github.com/inmanjeffrey89-cell/yt-transcript-cli.git"
   },
   "license": "MIT",
+  "author": {
+    "name": "Jeffrey Inman",
+    "email": "jeff.helpsupport@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/inmanjeffrey89-cell/yt-transcript-cli/issues",
+    "email": "jeff.helpsupport@gmail.com"
+  },
+  "homepage": "https://github.com/inmanjeffrey89-cell/yt-transcript-cli#readme",
   "keywords": [
     "youtube",
     "transcript",
